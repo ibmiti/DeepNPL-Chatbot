@@ -6,14 +6,14 @@ import tensorflow as tf
 import re as replace
 import time as t
 
-# -----------------------------Gaining access to data, as GAD  ---------------
+# -----------------------------Gaining access to data, as GAD  --------------
 
 lines = open('movie_lines.txt', encoding='utf-8',errors='ignore').read().split('\n')
 conversations = open('movie_conversations.txt', encoding='utf-8', errors='ignore').read().split('\n')
 
-# ------------------------------End of GAD, as EOGAD -----------------------------------
+# ------------------------------End of GAD, as EOGAD ------------------------
 
-# ------------------------- Cleaning GAD, as Data -----------------------
+# ------------------------- Cleaning GAD, as Data ---------------------------
 
 # creating dictionary of line ids
 id2line = {}
@@ -54,4 +54,61 @@ def clean_text(text):
     text = replace.sub(r"can't", "cannot", text)
     text = replace.sub(r"[-()\"#/@;:<>{}+=~|.?,]", "", text)
     return text
+    
+    
+clean_questions = []
+for question in questions:
+    clean_questions.append(clean_text(question))
+    
+clean_answers = []
+for answer in answers:
+    clean_answers.append(clean_text(answer))
+    
+    
+word2count = {}
+# for evert item within clean_question arr
+for question in clean_questions:
+    # split every word within and place each new string into a temp var of word
+    for word in question.split():
+        # if word not in word2count ( avoids duplicates )
+        if word not in word2count:
+            word2count[word] = 1
+        else:
+            word2count[word] += 1
+
+for answer in clean_answers:
+    for word in answer.split():
+        if word not in word2count:
+            word2count[word]= 1
+        else:
+            word2count[word] += 1
+            
+# creating two dictionaries that map the questions words and the answers to a unique integer
+threshold = 20
+questionswords2int = {}
+word_number = 0
+
+# for there are words that we want to take account of.
+# and for there are a number of words we will be accounting for 
+# these words and the count of them will be found within word2count dictionary 
+
+# simplified :
+# loop through the word2count dict. items and give each thing within into 2 variables 
+# one will hold the value of the words the other will take acount of the integer value for each    
+for word, count in word2count.items():
+    if count >= threshold:
+        questionswords2int[word] = word_number
+        word_number += 1
+        
+answerswords2int = {}
+word_number = 0 
+for word, count in word2count.items():
+    if count >= threshold:
+        answerswords2int[word] = word_number
+        word_number += 1                
+
+# Adding the last tokens to these two dictionaries 
+tokens = ['<PAD>', '<EOS>', '<OUT>','<SOS>']
+
+        
     
