@@ -118,5 +118,14 @@ for token in tokens:
 answersint2word = {w_i: w for w, w_i in answerswords2int.items()}        
     
 # Adding the End Of String token to the end of every answer 
+
+# getting the length of each line from clean_answers list
+# then adding the token to the end of each line by referncing the number found by getting the length of each line
 for i in range(len(clean_answers)):
     clean_answers[i] += ' <EOS>' 
+    
+# Translating all questions and answers into integers 
+# And replacing all the words that were filtered out by <OUT>
+    
+    
+    
