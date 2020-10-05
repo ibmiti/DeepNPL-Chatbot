@@ -126,6 +126,33 @@ for i in range(len(clean_answers)):
     
 # Translating all questions and answers into integers 
 # And replacing all the words that were filtered out by <OUT>
+questions_to_int = []    
+for question in clean_questions:
+    ints = []
+    for word in question.split():
+        if word not in questionswords2int:
+            ints.append(questionswords2int['<OUT>'])
+        else: 
+            ints.append(questionswords2int[word])
+    questions_to_int.append(ints)        
+
+answers_to_int = []    
+for answer in clean_answers:
+    ints = []
+    for word in answer.split():
+        if word not in answerswords2int:
+            ints.append(answerswords2int['<OUT>'])
+        else: 
+            ints.append(answerswords2int[word])
+    answers_to_int.append(ints)
     
+# Sorting questions and answers by the length of questions 
+sorted_clean_questions= []
+sorted_clean_answers = []
+for length in range(1,25 + 1):
+  for i in enumerate(questions_to_int):
+      if len(i[1]) == length:
+          sorted_clean_questions.append(questions_to_int[i[0]])
+          sorted_clean_answers.append(answers_to_int[i[0]])
     
     
