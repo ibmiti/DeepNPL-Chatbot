@@ -149,10 +149,72 @@ for answer in clean_answers:
 # Sorting questions and answers by the length of questions 
 sorted_clean_questions= []
 sorted_clean_answers = []
-for length in range(1,25 + 1):
+for length in range(1, 25 + 1):
   for i in enumerate(questions_to_int):
       if len(i[1]) == length:
           sorted_clean_questions.append(questions_to_int[i[0]])
           sorted_clean_answers.append(answers_to_int[i[0]])
+          
+          
+#### Building the SEQ2SEQ MODEL ####
+# using this function to create tensorflow place holders
+def model_inputs():
+    # inputs represented by 2 dimensional list 
+    inputs  = tf.placeholder(tf.int32,[None, None], name = 'input')              
+    targets = tf.placeholder(tf.int32, [None, None], name = 'target')
+    lr      = tf.placeholder(tf.float32, name='learning_rate')
+    keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+    return inputs, targets, lr, keep_prob
+
+# Preprocessing the targets 
+def preprocess_targets(targets, word2int, batch_size):
+    left_side  = tf.fill([batch_size, 1], word2int['<SOS>'])
+    # [batch_size, - 1] means everything within batch_size except the last one
+    right_side = tf.strided_slice(targets,[0,0], [batch_size, -1],[1,1])
+    preprocessed_targets = tf.concat([left_side, right_side], 1)
+    return preprocessed_targets
+    
+# Creating the Encoder RNN Layer 
+def encoder_rnn_layer(rnn_inputs, rnn_size, keep_prob, sequence_length):
+#    long short term memory as lstm
+    lstm             = tf.contrib.rnn.BasicLSTMCell(rnn_size)
+    ltsm_dropout     = tf.contrib.rnn.DropoutWrapper(lstm, input_keep_prob = keep_prob)
+    encoder_cell     = tf.contrib.rnn.MultiRNNCell([lstm_dropout] * num_layers)
+    encoder_output, encoder_state = tf.nn.bidrectional_dynamic_rnn(cell_fw = encoder_cell,
+                                                      cell_bw = encoder_cell,
+                                                      sequence_length = sequence_length,
+                                                      inputs = rnn_inputs,
+                                                      dtype = tf.float32)
+    return encoder_state
+
+# Decoding the training set 
+    # we are now decoding the encoded state...
+def decode_training_set(encoder_state, decoder_cell, decoder_embedded_input, sequence_length, decoding_scope, output_function, keep_prob, batch_size):
+    attention_states = tf.zeros([batch_size, 1, decoder_cell.output_size])
+    attention_keys, attention_values, attention_score_function, attention_construct_function = tf.contrib.seq2seq.prepare_attention(attention_states, attention_option = 'bahdanau', num_units = decoder_cell.output_size)
+    training_decoder_function = tf.contrib.seq2seq.attention_decoder_fn_train(encoder_state[0],
+                                                                              attention_keys,
+                                                                              attention_values,
+                                                                              attention_score_function,
+                                                                              attention_construct_function,
+                                                                              name = "attn_dec_train")
+    decoder_output, decoder_final_state, decoder_final_context_state = tf.contrib.seq2seq.dynamic_rnn_decoder(decoder_cell,
+                                                                                                              training_decoder_function,
+                                                                                                              decoder_embedded_input,
+                                                                                                              sequence_length,
+                                                                                                              scope = decoding_scope    
+                                                                                                              )
+    decoder_output_dropout = tf.nn.dropout(decoder_output, keep_prob)
+    return output_function(decoder_output_dropout)
+
+
+    
+    
+    
+    
+    
+    
+    
+                    
     
     
