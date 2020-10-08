@@ -270,7 +270,19 @@ def decoder_rnn(decoder_embedded_inputs,decoder_embedding_matrix,encoder_state,n
     return training_predictions, test_predictions
 ## make sure to pseudo code the above when done ##
 
+# Building seq2seq model
+# this is the brain
+def seq2seq_model(inputs, targets, batch_size, sequence_length, answers_num_words, questions_num_words, encoder_embedding_size, decoder_embedding_size, rnn_size, num_layers, questionswords2int):
+    encoder_embedded_input = tf.contrib.layers.embed_sequence(inputs,
+                                                              answers_num_words + 1,
+                                                              encoder_embedding_size,
+                                                              intializer = tf.random_uniform_initializer(0,1))
+    # this will become the input for the decoder
+    encoder_state = encoder_rnn(encoder_embedded_input, rnn_size, num_layers, keep_prob, sequence_length)
     
+    
+    
+
     
     
     
