@@ -294,18 +294,3 @@ def seq2seq_model(inputs, targets, batch_size, sequence_length, answers_num_word
                                                          keep_prob,
                                                          batch_size)
     return training_predictions, test_predictions
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
-    
-                    
-    
-    
